@@ -632,7 +632,6 @@ sub run_tex_attempt {
         #the message below is slightly misleading because $program for
         #latex2e hyper/nohyper is the same.
         $log->verbose("$program '$self->{filename}' failed.");
-        #$self->trash_tex_aux_files($stime, $written);
         my $dvi = $self->basename() . '.dvi';
         if (-e "$self->{fileset}->{dir}/$dvi") {
           $log->verbose("removing leftover dvi file '$dvi'");
@@ -641,6 +640,7 @@ sub run_tex_attempt {
         }
         $failed++;
         if ($failed > 1) {
+          $self->trash_tex_aux_files($stime, $written);
           last;
         }
       }
