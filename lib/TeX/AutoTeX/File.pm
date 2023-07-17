@@ -606,7 +606,7 @@ sub run_tex_attempt {
   my $extra_pass = 0;
   my $xfontcreate = 0;
   my $lastlog_ref;
-  my $failed;
+  my $failed=0;
 
   my @ORDER = qw(first second third fourth fifth sixth seventh);
 
@@ -632,15 +632,17 @@ sub run_tex_attempt {
         #the message below is slightly misleading because $program for
         #latex2e hyper/nohyper is the same.
         $log->verbose("$program '$self->{filename}' failed.");
-        $self->trash_tex_aux_files($stime, $written);
+        #$self->trash_tex_aux_files($stime, $written);
         my $dvi = $self->basename() . '.dvi';
         if (-e "$self->{fileset}->{dir}/$dvi") {
           $log->verbose("removing leftover dvi file '$dvi'");
           unlink "$self->{fileset}->{dir}/$dvi" or
             $log->verbose("Could not remove file '$dvi'.");
         }
-        $failed = 1;
-        last;
+        $failed++;
+        if ($failed > 1) {
+          last;
+        }
       }
     }
 
@@ -678,7 +680,12 @@ sub run_tex_attempt {
     $log->verbose("WARNING: Reached max number of passes, possibly failed to get CROSS-REFERENCES right.");
   }
   $self->trash_tex_aux_files($stime, $written);
-  return $failed;
+  if ($failed > 0) {
+    return 1;
+  } else {
+    my $dummy;
+    return $dummy;
+  }
 }
 
 sub extra_pass {
